@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тренажер НМТ — Теорія ймовірностей</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <h1>Теорія ймовірностей</h1>
+      <p class="subtitle">Тренажер для підготовки до НМТ · Тема 37</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="quiz"     role="tab">Тренажер задач</button>
+      <button class="tab"        data-tab="simulate" role="tab">Симуляції</button>
+      <button class="tab"        data-tab="venn"     role="tab">Діаграми Венна</button>
+      <button class="tab"        data-tab="stats"    role="tab">Статистика</button>
+      <button class="tab"        data-tab="formulas" role="tab">Формули</button>
+    </nav>
+
+    <!-- QUIZ -->
+    <section id="tab-quiz" class="panel active">
+      <div class="score-row">
+        <span class="chip chip-ok"   id="sc-ok">✓ 0 правильно</span>
+        <span class="chip chip-err"  id="sc-err">✗ 0 помилок</span>
+        <span class="chip chip-left" id="sc-left"></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+      <div id="qarea"></div>
+      <div class="nav-row">
+        <button id="btn-next"  class="btn-primary"  style="display:none" onclick="nextQ()">Наступна →</button>
+        <button id="btn-hint"  class="btn-secondary" onclick="showHint()">💡 Підказка</button>
+        <button id="btn-reset" class="btn-secondary" onclick="restartQuiz()">↺ Спочатку</button>
+      </div>
+    </section>
+
+    <!-- SIMULATE -->
+    <section id="tab-simulate" class="panel">
+      <div class="sim-tabs">
+        <button class="sim-tab active" data-sim="coin">Монетка</button>
+        <button class="sim-tab" data-sim="dice">Кубик</button>
+        <button class="sim-tab" data-sim="balls">Кульки в урні</button>
+      </div>
+
+      <div id="sim-coin" class="sim-panel active">
+        <p class="sim-desc">Спостерігай, як відносна частота сходиться до теоретичної ймовірності 0,5 зі зростанням кількості дослідів.</p>
+        <div class="control-row">
+          <label>Кількість підкидань</label>
+          <input type="range" id="coinN" min="10" max="2000" step="10" value="200">
+          <span id="coinNVal">200</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="runCoin()">Підкинути</button>
+          <button class="btn-secondary" onclick="runCoinMany()">500 серій</button>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-n" id="c-total">—</div><div class="stat-l">дослідів</div></div>
+          <div class="stat-card"><div class="stat-n" id="c-heads">—</div><div class="stat-l">Орел</div></div>
+          <div class="stat-card"><div class="stat-n" id="c-tails">—</div><div class="stat-l">Решка</div></div>
+        </div>
+        <div class="bar-block">
+          <div class="bar-row"><span class="bar-lbl">Орел (факт.)</span><div class="bar-track"><div class="bar-fill blue" id="bh" style="width:50%"></div></div><span class="bar-pct" id="bh-p">50%</span></div>
+          <div class="bar-row"><span class="bar-lbl">Решка (факт.)</span><div class="bar-track"><div class="bar-fill gray" id="bt" style="width:50%"></div></div><span class="bar-pct" id="bt-p">50%</span></div>
+          <div class="bar-row"><span class="bar-lbl">Теор. 0,5</span><div class="bar-track"><div class="bar-fill green" style="width:50%"></div></div><span class="bar-pct">50%</span></div>
+        </div>
+        <div class="chart-wrap"><canvas id="coinChart"></canvas></div>
+        <div class="info-box">Теоретична ймовірність: P(Орел) = 1/2 = 0,5. Закон великих чисел: чим більше дослідів, тим ближче відносна частота до теоретичної ймовірності.</div>
+      </div>
+
+      <div id="sim-dice" class="sim-panel">
+        <p class="sim-desc">Кожна грань кубика має теоретичну ймовірність 1/6 ≈ 16,7%. Симуляція показує збіжність до теорії.</p>
+        <div class="control-row">
+          <label>Кількість кидань</label>
+          <input type="range" id="diceN" min="6" max="3000" step="6" value="600">
+          <span id="diceNVal">600</span>
+        </div>
+        <button class="btn-primary" onclick="runDice()">Кинути кубик</button>
+        <div class="dice-grid" id="diceGrid"></div>
+        <div class="chart-wrap"><canvas id="diceChart"></canvas></div>
+        <div class="info-box">Теоретична ймовірність кожної грані: P = 1/6 ≈ 0,167 (≈ 16,7%)</div>
+      </div>
+
+      <div id="sim-balls" class="sim-panel">
+        <p class="sim-desc">Класичне означення ймовірності: P(A) = m/n, де m — кількість сприятливих наслідків.</p>
+        <div class="control-row">
+          <label>Всього куль (n)</label>
+          <input type="range" id="totalBalls" min="2" max="20" step="1" value="10" oninput="updateBalls()">
+          <span id="totalBallsVal">10</span>
+        </div>
+        <div class="control-row">
+          <label>Червоних (m)</label>
+          <input type="range" id="redBalls" min="1" max="19" step="1" value="3" oninput="updateBalls()">
+          <span id="redBallsVal">3</span>
+        </div>
+        <div id="ballViz" class="ball-viz"></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-n" id="b-n">10</div><div class="stat-l">всього куль (n)</div></div>
+          <div class="stat-card"><div class="stat-n" id="b-m">3</div><div class="stat-l">червоних (m)</div></div>
+          <div class="stat-card"><div class="stat-n" id="b-p">0,30</div><div class="stat-l">P(червона)</div></div>
+        </div>
+        <div class="info-box" id="ballInfo"></div>
+      </div>
+    </section>
+
+    <!-- VENN -->
+    <section id="tab-venn" class="panel">
+      <p class="sim-desc">Натисни на операцію — побачиш виділену область на діаграмі Ейлера–Венна.</p>
+      <div class="venn-btns">
+        <button class="venn-btn active" onclick="setVenn('A',this)">A</button>
+        <button class="venn-btn" onclick="setVenn('B',this)">B</button>
+        <button class="venn-btn" onclick="setVenn('AiB',this)">A ∩ B (перетин)</button>
+        <button class="venn-btn" onclick="setVenn('AuB',this)">A ∪ B (об'єднання)</button>
+        <button class="venn-btn" onclick="setVenn('notA',this)">Ā (протилежна)</button>
+        <button class="venn-btn" onclick="setVenn('AminB',this)">A \ B (різниця)</button>
+        <button class="venn-btn" onclick="setVenn('none',this)">∅ (неможлива)</button>
+      </div>
+      <svg id="venn-svg" viewBox="0 0 440 230" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="clipA"><circle cx="165" cy="115" r="85"/></clipPath>
+          <clipPath id="clipB"><circle cx="275" cy="115" r="85"/></clipPath>
+        </defs>
+        <rect id="vU-bg"    x="30" y="20" width="380" height="190" rx="10" fill="transparent"/>
+        <circle id="vA-bg"  cx="165" cy="115" r="85" fill="transparent"/>
+        <circle id="vB-bg"  cx="275" cy="115" r="85" fill="transparent"/>
+        <circle id="vInt"   cx="165" cy="115" r="85" clip-path="url(#clipB)" fill="transparent"/>
+        <circle id="vAminB" cx="165" cy="115" r="85" fill="transparent"/>
+        <rect    x="30" y="20" width="380" height="190" rx="10" fill="none" stroke="#aaa" stroke-width="1"/>
+        <circle cx="165" cy="115" r="85" fill="none" stroke="#888" stroke-width="1.5"/>
+        <circle cx="275" cy="115" r="85" fill="none" stroke="#888" stroke-width="1.5"/>
+        <text x="115" y="120" font-size="24" font-weight="600" fill="#444" text-anchor="middle">A</text>
+        <text x="325" y="120" font-size="24" font-weight="600" fill="#444" text-anchor="middle">B</text>
+        <text x="50"  y="40"  font-size="14" fill="#888">Ω</text>
+      </svg>
+      <div class="venn-info" id="venn-info"></div>
+    </section>
+
+    <!-- STATS CALCULATOR -->
+    <section id="tab-stats" class="panel">
+      <p class="sim-desc">Введи числа через кому або пробіл — отримаєш усі характеристики вибірки.</p>
+      <div class="stats-input-wrap">
+        <textarea id="statsInput" placeholder="Наприклад: 7 8 9 10 11 12 13 14 15" rows="3"></textarea>
+        <button class="btn-primary" onclick="calcStats()">Обчислити</button>
+      </div>
+      <div id="statsResult" class="stats-result"></div>
+      <div class="stats-examples">
+        <p class="examples-title">Приклади з довідника:</p>
+        <button class="btn-secondary small" onclick="loadExample('5 8 12 21 10 17 19')">Задача 15 (стор. 437)</button>
+        <button class="btn-secondary small" onclick="loadExample('2 4 5.6 12 17 21')">Задача 26 (стор. 440)</button>
+        <button class="btn-secondary small" onclick="loadExample('9 10 8 9 13 6 6 7 9 10 10 11 10 12 11 7 9 8 9 9 6 6 7 8 10 7 9 8 9 8 12')">Задача 28 (стор. 241)</button>
+      </div>
+    </section>
+
+    <!-- FORMULAS -->
+    <section id="tab-formulas" class="panel">
+      <div class="formulas-grid" id="formulas-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Тренажер НМТ · Теорія ймовірностей · Тема 37 · <a href="https://github.com/pastushak/probability-trainer" target="_blank">GitHub</a></p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="data/questions.js"></script>
+  <script src="data/formulas.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/simulate.js"></script>
+  <script src="js/venn.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
