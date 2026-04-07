@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Теорія ймовірностей — Конспект</title>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<style>
+:root {
+  --ink:     #0f0f0f;
+  --paper:   #faf8f3;
+  --cream:   #f0ede4;
+  --rule:    #ddd8cc;
+  --blue:    #1a4fa0;
+  --blue-l:  #dce8ff;
+  --green:   #0d6e4f;
+  --green-l: #d4f0e6;
+  --amber:   #8a5a00;
+  --amber-l: #fef3cc;
+  --red:     #8b1a1a;
+  --red-l:   #fde8e8;
+  --purple:  #4a1d8a;
+  --purple-l:#ede8ff;
+  --mono:    'JetBrains Mono', monospace;
+  --sans:    'Geologica', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 3rem 2rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: 'P(A)';
+  position: absolute;
+  right: -20px; top: -20px;
+  font-size: 160px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  pointer-events: none;
+  font-family: var(--sans);
+}
+.header-inner { max-width: 860px; margin: 0 auto; }
+.subject-tag {
+  font-size: 11px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: .75rem;
+}
+header h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+}
+header h1 span { color: #7eb3ff; }
+.header-meta {
+  display: flex; gap: 1.5rem; flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+.meta-pill {
+  font-size: 12px; font-weight: 500;
+  padding: 4px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.65);
+}
+
+/* ── LAYOUT ── */
+main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 2.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background: #fff;
+}
+.section-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: background .15s;
+}
+.section-header:hover { background: var(--cream); }
+.section-header.open { border-bottom-color: var(--rule); }
+.sec-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+}
+.sec-title { font-size: 16px; font-weight: 700; flex: 1; }
+.sec-arrow {
+  font-size: 14px; color: #999;
+  transition: transform .25s;
+}
+.section-header.open .sec-arrow { transform: rotate(180deg); }
+.section-body {
+  padding: 1.5rem;
+  display: none;
+}
+.section-body.open { display: block; }
+
+/* Кольори секцій */
+.s1 .sec-num { background: var(--blue-l);   color: var(--blue); }
+.s2 .sec-num { background: var(--green-l);  color: var(--green); }
+.s3 .sec-num { background: var(--amber-l);  color: var(--amber); }
+.s4 .sec-num { background: var(--purple-l); color: var(--purple); }
+.s5 .sec-num { background: var(--red-l);    color: var(--red); }
+.s6 .sec-num { background: var(--blue-l);   color: var(--blue); }
+
+/* ── ТИПИ ПОДІЙ ── */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px; margin: 1rem 0;
+}
+.event-card {
+  border-radius: 8px;
+  padding: 12px 14px;
+  border-left: 3px solid;
+}
+.ev-sure    { background: var(--green-l);  border-color: var(--green); }
+.ev-imp     { background: var(--red-l);    border-color: var(--red); }
+.ev-rand    { background: var(--blue-l);   border-color: var(--blue); }
+.ev-opp     { background: var(--amber-l);  border-color: var(--amber); }
+.ev-incom   { background: var(--purple-l); border-color: var(--purple); }
+.event-card .ev-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.event-card .ev-desc { font-size: 12px; line-height: 1.5; color: #555; }
+.event-card .ev-formula {
+  font-family: var(--mono); font-size: 13px;
+  margin-top: 6px; font-weight: 600;
+}
+
+/* ── FORMULA TABLE ── */
+.ftable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 1rem 0;
+}
+.ftable th {
+  background: var(--cream);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .5px;
+  border-bottom: 2px solid var(--rule);
+}
+.ftable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: middle;
+}
+.ftable tr:last-child td { border-bottom: none; }
+.ftable tr:hover td { background: var(--cream); }
+.ftable .tag {
+  display: inline-block;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 10px;
+}
+.tag-cl  { background: var(--blue-l);   color: var(--blue); }
+.tag-st  { background: var(--green-l);  color: var(--green); }
+.tag-geo { background: var(--purple-l); color: var(--purple); }
+
+/* ── FORMULA BOX ── */
+.fbox {
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 10px 0;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.fbox-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.fbox-content .fbox-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.fbox-content .fbox-formula { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+.fbox-content .fbox-note { font-size: 12px; color: #666; margin-top: 4px; }
+.fbox-blue   { background: var(--blue-l); }
+.fbox-green  { background: var(--green-l); }
+.fbox-amber  { background: var(--amber-l); }
+.fbox-red    { background: var(--red-l); }
+.fbox-purple { background: var(--purple-l); }
+
+/* ── VENN DIAGRAM ── */
+.venn-wrap {
+  display: flex; gap: 2rem; align-items: flex-start;
+  flex-wrap: wrap; margin: 1rem 0;
+}
+.venn-svg-wrap { flex-shrink: 0; }
+.venn-legend { flex: 1; min-width: 200px; }
+.venn-legend-item {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px; font-size: 13px;
+}
+.vleg-dot {
+  width: 14px; height: 14px;
+  border-radius: 3px; flex-shrink: 0;
+}
+
+/* ── EXAMPLE BOX ── */
+.example {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.example-header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.example-body { padding: 14px; }
+.example-body p { font-size: 14px; margin-bottom: 8px; }
+.step {
+  display: flex; gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.step-n {
+  width: 22px; height: 22px;
+  background: var(--ink); color: var(--paper);
+  border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.answer-row {
+  background: var(--cream);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── COMBO TABLE ── */
+.combo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px; margin: 1rem 0;
+}
+.combo-card {
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid var(--rule);
+}
+.combo-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.combo-card .cf { font-family: var(--mono); font-size: 13px; font-weight: 600; margin: 4px 0; }
+.combo-card .cn { font-size: 12px; color: #666; }
+
+/* ── ALGORITHM BOX ── */
+.algo {
+  counter-reset: algo-step;
+  margin: 1rem 0;
+}
+.algo-step {
+  display: flex; gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 14px;
+}
+.algo-step:last-child { border-bottom: none; }
+.algo-step::before {
+  counter-increment: algo-step;
+  content: counter(algo-step);
+  width: 28px; height: 28px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 50%;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── МНЕМОНІКА ── */
+.mnemonic {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin: 1rem 0;
+}
+.mnemonic h4 { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #7eb3ff; margin-bottom: .5rem; }
+.mnemonic p  { font-size: 14px; line-height: 1.7; }
+.mnemonic strong { color: #ffd27e; }
+
+/* ── PRINT ── */
+@media print {
+  header { background: #000 !important; -webkit-print-color-adjust: exact; }
+  .section-body { display: block !important; }
+  .sec-arrow { display: none; }
+  .section-header { cursor: default; }
+}
+
+@media (max-width: 540px) {
+  .combo-grid { grid-template-columns: 1fr; }
+  .venn-wrap { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="subject-tag">Математика · НМТ · Тема 37</div>
+    <h1>Теорія<br><span>ймовірностей</span></h1>
+    <div class="header-meta">
+      <span class="meta-pill">5 розділів</span>
+      <span class="meta-pill">Всі формули</span>
+      <span class="meta-pill">Приклади з ЗНО</span>
+      <span class="meta-pill">Алгоритм розв'язання</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══ 1. БАЗОВІ ПОНЯТТЯ ═══ -->
+<div class="section s1">
+  <div class="section-header open" onclick="toggle(this)">
+    <div class="sec-num">1</div>
+    <div class="sec-title">Базові поняття та типи подій</div>
+    <div class="sec-arrow">▼</div>
+  </div>
+  <div class="section-body open">
+    <p style="font-size:14px;color:#555;margin-bottom:1rem">
+      <strong>Подія</strong> — будь-яке явище, про яке можна сказати: відбудеться або не відбудеться. Позначають великими літерами: \(A, B, C\ldots\)
+    </p>
+    <div class="events-grid">
+      <div class="event-card ev-sure">
+        <div class="ev-name">Достовірна \(U\)</div>
+        <div class="ev-desc">Завжди відбувається при даному досліді</div>
+        <div class="ev-formula">\(P(U) = 1\)</div>
+      </div>
+      <div class="event-card ev-imp">
+        <div class="ev-name">Неможлива \(\varnothing\)</div>
+        <div class="ev-desc">Ніколи не відбувається при даному досліді</div>
+        <div class="ev-formula">\(P(\varnothing) = 0\)</div>
+      </div>
+      <div class="event-card ev-rand">
+        <div class="ev-name">Випадкова \(A\)</div>
+        <div class="ev-desc">Може відбутись або ні — невідомо наперед</div>
+        <div class="ev-formula">\(0 < P(A) < 1\)</div>
+      </div>
+      <div class="event-card ev-opp">
+        <div class="ev-name">Протилежна \(\overline{A}\)</div>
+        <div class="ev-desc">«Не A» — відбувається тоді, коли A не відбувається</div>
+        <div class="ev-formula">\(P(A)+P(\overline{A})=1\)</div>
+      </div>
+      <div class="event-card ev-incom">
+        <div class="ev-name">Несумісні \(A, B\)</div>
+        <div class="ev-desc">Не можуть відбутись одночасно. \(A \cap B = \varnothing\)</div>
+        <div class="ev-formula">\(P(A \cap B) = 0\)</div>
+      </div>
+    </div>
+    <div class="mnemonic">
+      <h4>💡 ЗАПАМ'ЯТАЙ</h4>
+      <p>Ймовірність — це число від 0 до 1. <strong>0 = ніколи, 1 = завжди.</strong> Все інше — між ними. Чим ближче до 1 — тим імовірніше.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 2. ТРИ ВИЗНАЧЕННЯ ═══ -->
+<div class="section s2">
+  <div class="section-header open" onclick="toggle(this)">
+    <div class="sec-num">2</div>
+    <div class="sec-title">Три визначення ймовірності</div>
+    <div class="sec-arrow">▼</div>
+  </div>
+  <div class="section-body open">
+    <table class="ftable">
+      <thead>
+        <tr>
+          <th>Тип</th>
+          <th>Формула</th>
+          <th>Коли використовувати?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-cl">Класичне</span></td>
+          <td>\(\displaystyle P(A) = \frac{m}{n}\)</td>
+          <td>Є рівноможливі наслідки — кубики, карти, кулі в урні, числа на картках</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-st">Статистичне</span></td>
+          <td>\(\displaystyle W(A) = \frac{n(A)}{n}\)</td>
+          <td>Є результати серії дослідів — брак на заводі, опитування, статистика</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-geo">Геометричне</span></td>
+          <td>\(\displaystyle P(A) = \frac{S_a}{S_\Omega}\)</td>
+          <td>Вибирається точка на відрізку, площі, в тілі — мішень, парковка</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="fbox fbox-blue">
+      <div class="fbox-icon">📌</div>
+      <div class="fbox-content">
+        <div class="fbox-title">Класичне означення — найчастіше на НМТ</div>
+        <div class="fbox-formula">\(P(A) = \dfrac{m}{n}\)</div>
+        <div class="fbox-note"><strong>m</strong> — кількість сприятливих наслідків &nbsp;|&nbsp; <strong>n</strong> — загальна кількість рівноможливих наслідків</div>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example-header">📝 Приклад — класична ймовірність</div>
+      <div class="example-body">
+        <p>У коробці 5 білих і 3 чорні кулі. Яка ймовірність витягнути білу?</p>
+        <div class="step"><div class="step-n">1</div><div>Рахуємо загальну кількість: \(n = 5 + 3 = 8\)</div></div>
+        <div class="step"><div class="step-n">2</div><div>Рахуємо сприятливі (білі): \(m = 5\)</div></div>
+        <div class="step"><div class="step-n">3</div><div>Підставляємо: \(P(A) = \dfrac{5}{8} = 0{,}625\)</div></div>
+        <div class="answer-row">✓ Відповідь: \(P(A) = 0{,}625\)</div>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example-header">📝 Приклад — геометрична ймовірність</div>
+      <div class="example-body">
+        <p>По мішені (радіус 7) стріляють навмання. Яка ймовірність влучити в «десятку» (радіус 1)?</p>
+        <div class="step"><div class="step-n">1</div><div>Площа «десятки»: \(S_a = \pi \cdot 1^2 = \pi\)</div></div>
+        <div class="step"><div class="step-n">2</div><div>Площа всієї мішені: \(S_\Omega = \pi \cdot 7^2 = 49\pi\)</div></div>
+        <div class="step"><div class="step-n">3</div><div>\(P(A) = \dfrac{\pi}{49\pi} = \dfrac{1}{49}\)</div></div>
+        <div class="answer-row">✓ Відповідь: \(\dfrac{1}{49}\)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 3. ОПЕРАЦІЇ НАД ПОДІЯМИ ═══ -->
+<div class="section s3">
+  <div class="section-header open" onclick="toggle(this)">
+    <div class="sec-num">3</div>
+    <div class="sec-title">Операції над подіями — Алгебра подій</div>
+    <div class="sec-arrow">▼</div>
+  </div>
+  <div class="section-body open">
+
+    <div class="venn-wrap">
+      <div class="venn-svg-wrap">
+        <svg viewBox="0 0 240 160" width="240" height="160" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="5" width="230" height="150" rx="8" fill="#f8f6f0" stroke="#ccc" stroke-width="1"/>
+          <circle cx="95"  cy="80" r="55" fill="rgba(26,79,160,0.15)" stroke="#1a4fa0" stroke-width="1.5"/>
+          <circle cx="145" cy="80" r="55" fill="rgba(13,110,79,0.15)" stroke="#0d6e4f" stroke-width="1.5"/>
+          <!-- intersection -->
+          <path d="M120,31 A55,55 0 0,1 120,129 A55,55 0 0,1 120,31" fill="rgba(138,90,0,0.2)"/>
+          <text x="75"  y="83" font-size="18" font-weight="700" fill="#1a4fa0" text-anchor="middle" font-family="Geologica,sans-serif">A</text>
+          <text x="165" y="83" font-size="18" font-weight="700" fill="#0d6e4f" text-anchor="middle" font-family="Geologica,sans-serif">B</text>
+          <text x="120" y="83" font-size="11" font-weight="600" fill="#8a5a00" text-anchor="middle" font-family="Geologica,sans-serif">A∩B</text>
+          <text x="218" y="20" font-size="11" fill="#999" font-family="Geologica,sans-serif">Ω</text>
+        </svg>
+      </div>
+      <div class="venn-legend">
+        <div class="venn-legend-item"><div class="vleg-dot" style="background:#1a4fa0"></div> Тільки A (синя зона)</div>
+        <div class="venn-legend-item"><div class="vleg-dot" style="background:#0d6e4f"></div> Тільки B (зелена зона)</div>
+        <div class="venn-legend-item"><div class="vleg-dot" style="background:#8a5a00"></div> A ∩ B — перетин (обидві)</div>
+        <div class="venn-legend-item"><div class="vleg-dot" style="background:#aaa"></div> Ω — весь простір подій</div>
+      </div>
+    </div>
+
+    <p style="font-weight:700;font-size:14px;margin:1rem 0 .5rem">А. Сума подій — сполучник «АБО»</p>
+    <div class="fbox fbox-green">
+      <div class="fbox-icon">➕</div>
+      <div class="fbox-content">
+        <div class="fbox-title">Несумісні події (A ∩ B = ∅)</div>
+        <div class="fbox-formula">\(P(A \cup B) = P(A) + P(B)\)</div>
+        <div class="fbox-note">Приклад: бідон із липовим АБО гречаним медом</div>
+      </div>
+    </div>
+    <div class="fbox fbox-amber">
+      <div class="fbox-icon">➕</div>
+      <div class="fbox-content">
+        <div class="fbox-title">Сумісні події (A ∩ B ≠ ∅)</div>
+        <div class="fbox-formula">\(P(A \cup B) = P(A) + P(B) - P(A \cap B)\)</div>
+        <div class="fbox-note">Приклад: число кратне 4 АБО кратне 6 — число 12 входить до обох!</div>
+      </div>
+    </div>
+
+    <p style="font-weight:700;font-size:14px;margin:1rem 0 .5rem">Б. Добуток подій — сполучник «І»</p>
+    <div class="fbox fbox-blue">
+      <div class="fbox-icon">✖️</div>
+      <div class="fbox-content">
+        <div class="fbox-title">Незалежні події</div>
+        <div class="fbox-formula">\(P(A \cap B) = P(A) \cdot P(B)\)</div>
+        <div class="fbox-note">Приклад: монета І кубик — результати не впливають один на одного</div>
+      </div>
+    </div>
+    <div class="fbox fbox-red">
+      <div class="fbox-icon">✖️</div>
+      <div class="fbox-content">
+        <div class="fbox-title">Залежні події (умовна ймовірність)</div>
+        <div class="fbox-formula">\(P(A \cap B) = P(A) \cdot P(B|A)\)</div>
+        <div class="fbox-note">\(P(B|A)\) — ймовірність B, якщо A вже відбулась. Приклад: вилучення куль без повернення</div>
+      </div>
+    </div>
+
+    <div class="fbox fbox-purple">
+      <div class="fbox-icon">⚡</div>
+      <div class="fbox-content">
+        <div class="fbox-title">Хоча б одна з n незалежних подій</div>
+        <div class="fbox-formula">\(P(C) = 1 - q_1 \cdot q_2 \cdot \ldots \cdot q_n\)</div>
+        <div class="fbox-note">де \(q_i = 1 - p_i\) — ймовірність НЕнастання події \(A_i\)</div>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example-header">📝 Приклад — «хоча б одна»</div>
+      <div class="example-body">
+        <p>Стрілець стріляє двічі. Ймовірність влучання = 0,8. Яка ймовірність влучити хоча б раз?</p>
+        <div class="step"><div class="step-n">1</div><div>Ймовірність промаху: \(q = 1 - 0{,}8 = 0{,}2\)</div></div>
+        <div class="step"><div class="step-n">2</div><div>Ймовірність двох промахів: \(q \cdot q = 0{,}2 \cdot 0{,}2 = 0{,}04\)</div></div>
+        <div class="step"><div class="step-n">3</div><div>\(P(\text{хоча б раз}) = 1 - 0{,}04 = 0{,}96\)</div></div>
+        <div class="answer-row">✓ Відповідь: 0,96 (96%)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 4. КОМБІНАТОРИКА ═══ -->
+<div class="section s4">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="sec-num">4</div>
+    <div class="sec-title">Комбінаторика — якщо треба вибрати групу</div>
+    <div class="sec-arrow">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="combo-grid">
+      <div class="combo-card" style="background:var(--blue-l);border-color:var(--blue)">
+        <h4>Перестановки</h4>
+        <div class="cf">\(P_n = n!\)</div>
+        <div class="cn">Скільки способів розставити n різних предметів? Порядок важливий, всі n елементів.</div>
+        <div class="cn" style="margin-top:6px">Приклад: 4 картки зі словом ХЛІБ — \(4! = 24\) варіанти</div>
+      </div>
+      <div class="combo-card" style="background:var(--green-l);border-color:var(--green)">
+        <h4>Розміщення \(A_n^k\)</h4>
+        <div class="cf">\(\displaystyle A_n^k = \frac{n!}{(n-k)!}\)</div>
+        <div class="cn">Вибираємо k з n, <strong>порядок важливий</strong> (президент і секретар — не одне й те саме).</div>
+      </div>
+      <div class="combo-card" style="background:var(--amber-l);border-color:var(--amber)">
+        <h4>Комбінації \(C_n^k\)</h4>
+        <div class="cf">\(\displaystyle C_n^k = \frac{n!}{k!(n-k)!}\)</div>
+        <div class="cn">Вибираємо k з n, <strong>порядок НЕ важливий</strong> (двоє чергових — однаково хто перший).</div>
+      </div>
+      <div class="combo-card" style="background:var(--purple-l);border-color:var(--purple)">
+        <h4>Факторіал \(n!\)</h4>
+        <div class="cf">\(n! = 1 \cdot 2 \cdot 3 \cdots n\)</div>
+        <div class="cn">\(0!=1,\; 1!=1,\; 2!=2,\; 3!=6,\; 4!=24,\; 5!=120\)</div>
+      </div>
+    </div>
+
+    <div class="mnemonic">
+      <h4>🎯 КЛЮЧОВЕ ПИТАННЯ</h4>
+      <p>Перед тим як рахувати, запитай себе:<br>
+      <strong>«Чи важливий порядок вибору?»</strong><br>
+      Так → Розміщення \(A_n^k\) &nbsp;|&nbsp; Ні → Комбінації \(C_n^k\)</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 5. СТАТИСТИКА ═══ -->
+<div class="section s5">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="sec-num">5</div>
+    <div class="sec-title">Статистика — вибіркові характеристики</div>
+    <div class="sec-arrow">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="events-grid">
+      <div class="event-card ev-sure">
+        <div class="ev-name">Мода \(Mo\)</div>
+        <div class="ev-desc">Значення, що зустрічається найчастіше у вибірці</div>
+      </div>
+      <div class="event-card ev-rand">
+        <div class="ev-name">Медіана \(Me\)</div>
+        <div class="ev-desc">Середній елемент впорядкованого ряду. При парному n — середнє двох середніх</div>
+      </div>
+      <div class="event-card ev-opp">
+        <div class="ev-name">Середнє \(\bar{x}\)</div>
+        <div class="ev-desc">\(\bar{x} = \dfrac{\sum x_i n_i}{\sum n_i}\) де \(n_i\) — частота значення \(x_i\)</div>
+      </div>
+      <div class="event-card ev-incom">
+        <div class="ev-name">Розмах \(R\)</div>
+        <div class="ev-desc">\(R = x_{\max} - x_{\min}\)</div>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example-header">📝 Приклад — знайти медіану</div>
+      <div class="example-body">
+        <p>Вибірка: 49, 14, 23, 31, 68. Знайти медіану.</p>
+        <div class="step"><div class="step-n">1</div><div>Впорядковуємо: 14, 23, <strong>31</strong>, 49, 68</div></div>
+        <div class="step"><div class="step-n">2</div><div>\(n = 5\) (непарна) → медіана — 3-й елемент</div></div>
+        <div class="answer-row">✓ \(Me = 31\)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 6. АЛГОРИТМ ═══ -->
+<div class="section s6">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="sec-num">6</div>
+    <div class="sec-title">Алгоритм розв'язання задачі на НМТ</div>
+    <div class="sec-arrow">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="algo">
+      <div class="algo-step">Прочитай умову і визнач <strong>тип задачі</strong>: є рівноможливі варіанти? є серія дослідів? вибирається точка на площі?</div>
+      <div class="algo-step">Вибери <strong>формулу</strong>: класична P=m/n, статистична W=n(A)/n, або геометрична P=Sₐ/SΩ</div>
+      <div class="algo-step">Якщо в задачі є слово <strong>«або»</strong> — це сума подій. Перевір: несумісні чи сумісні?</div>
+      <div class="algo-step">Якщо є слово <strong>«і»</strong> або «одночасно» — це добуток. Перевір: незалежні чи залежні?</div>
+      <div class="algo-step">Якщо є слово <strong>«хоча б»</strong> — застосуй метод протилежної події: \(P = 1 - q_1 q_2 \ldots q_n\)</div>
+      <div class="algo-step">Якщо треба <strong>вибрати групу</strong> — використай комбінаторику (порядок важливий → \(A_n^k\), ні → \(C_n^k\))</div>
+      <div class="algo-step">Перевір відповідь: ймовірність завжди від 0 до 1!</div>
+    </div>
+
+    <div class="mnemonic">
+      <h4>🔑 КЛЮЧОВІ СЛОВА → ФОРМУЛИ</h4>
+      <p>
+        <strong>«або»</strong> → додавання &nbsp;|&nbsp;
+        <strong>«і», «одночасно»</strong> → множення<br>
+        <strong>«хоча б одна»</strong> → \(1 - q_1 q_2 \ldots\) &nbsp;|&nbsp;
+        <strong>«жодна»</strong> → \(q_1 \cdot q_2 \cdots\)<br>
+        <strong>«не»</strong> → протилежна подія: \(P(\overline{A}) = 1 - P(A)\)
+      </p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function toggle(header) {
+  header.classList.toggle('open');
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+</script>
+</body>
+</html>
